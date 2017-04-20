@@ -1,0 +1,10 @@
+[package]
+authors = ["Jacek Całusiński <forger@forger.pl>"]
+name = "colored_logger"
+version = "0.1.0"
+
+[dependencies]
+chrono = "0.3.0"
+colored = "1.4.1"
+flexi_logger = "0.5.2"
+log = "0.3.7"
