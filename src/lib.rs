@@ -28,16 +28,16 @@ extern crate flexi_logger;
 extern crate colored;
 extern crate chrono;
 
-use flexi_logger::{LogRecord, LogLevel};
+use flexi_logger::{Record, Level};
 use colored::{Colorize, ColoredString};
 use chrono::Local;
 
 
-pub fn formatter(record: &LogRecord) -> String {
+pub fn formatter(record: &Record) -> String {
     let level = record.level();
 
-    fn color<T: ToString>(fstr: &T, level: LogLevel) -> ColoredString {
-        use self::LogLevel::*;
+    fn color<T: ToString>(fstr: &T, level: Level) -> ColoredString {
+        use self::Level::*;
         let fstr = fstr.to_string();
         let fstr = fstr.as_str();
 
@@ -53,8 +53,8 @@ pub fn formatter(record: &LogRecord) -> String {
     format!("[{}] {} [{}:{}] {}",
             color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
             color(&level, level),
-            color(&record.location().file(), level),
-            color(&record.location().line(), level),
+            color(&record.file().unwrap_or_default(), level),
+            color(&record.line().unwrap_or_default(), level),
             &record.args())
 
 }
