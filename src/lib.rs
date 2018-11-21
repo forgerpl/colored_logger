@@ -24,16 +24,15 @@
 //! }
 //! ```
 
-extern crate flexi_logger;
-extern crate colored;
 extern crate chrono;
+extern crate colored;
+extern crate flexi_logger;
 
-use flexi_logger::{Record, Level};
-use colored::{Colorize, ColoredString};
 use chrono::Local;
+use colored::{ColoredString, Colorize};
+use flexi_logger::{Level, Record};
 
-
-pub fn formatter(record: &Record) -> String {
+pub fn formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
     let level = record.level();
 
     fn color<T: ToString>(fstr: &T, level: Level) -> ColoredString {
@@ -50,18 +49,19 @@ pub fn formatter(record: &Record) -> String {
         }
     }
 
-    format!("[{}] {} [{}:{}] {}",
-            color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
-            color(&level, level),
-            color(&record.file().unwrap_or_default(), level),
-            color(&record.line().unwrap_or_default(), level),
-            &record.args())
-
+    write!(
+        w,
+        "[{}] {} [{}:{}] {}",
+        color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
+        color(&level, level),
+        color(&record.file().unwrap_or_default(), level),
+        color(&record.line().unwrap_or_default(), level),
+        &record.args()
+    )
 }
 
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-    }
+    fn it_works() {}
 }
