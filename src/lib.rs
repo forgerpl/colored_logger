@@ -6,16 +6,15 @@
 //!
 //! See examples/auto.rs
 
-extern crate chrono;
-extern crate colored;
-extern crate flexi_logger;
-
 use atty;
 use chrono::Local;
 use colored::{ColoredString, Colorize};
 use flexi_logger::{Level, Record};
 use std::env;
 use std::str::FromStr;
+
+#[macro_use]
+extern crate failure;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ColorChoice {
@@ -50,14 +49,18 @@ impl ColorChoice {
     }
 }
 
+#[derive(Debug, Fail)]
+#[fail(display = "Invalid color choice value")]
+pub struct InvalidColorChoice;
+
 impl FromStr for ColorChoice {
-    type Err=();
+    type Err=InvalidColorChoice;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "auto" => Ok(ColorChoice::Auto),
             "never" => Ok(ColorChoice::Never),
             "always" => Ok(ColorChoice::Always),
-            _ => Err(()),
+            _ => Err(InvalidColorChoice),
         }
     }
 }
