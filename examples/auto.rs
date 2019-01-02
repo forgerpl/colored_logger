@@ -11,13 +11,32 @@
 ///
 /// `$ cargo run --example auto &> out.txt` redirecting to file also suppresses
 /// using colors.
+///
+/// Use `--color` option for experimenting with forcing/blocking colored output.
 
 use log::{error, warn, info, debug, trace};
-use colored_logger::{ColorChoice, FormatterBuilder};
+use colored_logger::FormatterBuilder;
+use clap::{Arg, App};
 
 fn main() {
+    let matches = App::new("Colored Logger example")
+        .arg(
+            Arg::with_name("color")
+                .long("color")
+                .required(false)
+                .takes_value(true)
+                .possible_values(&["auto", "always", "never"])
+                .default_value("auto")
+                .help("Decides wheteher to use colors in log messages or not. \
+                    `auto` should result with colors in terminal and no colors \
+                    anywhere else")
+        )
+        .get_matches();
+    let color_choice = matches.value_of("color").unwrap().parse().unwrap();
+
+
     let formatter = FormatterBuilder::new()
-        .with_color(ColorChoice::Auto)
+        .with_color(color_choice)
         .build();
 
     flexi_logger::Logger::with_str("auto=trace")

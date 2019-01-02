@@ -15,6 +15,7 @@ use chrono::Local;
 use colored::{ColoredString, Colorize};
 use flexi_logger::{Level, Record};
 use std::env;
+use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ColorChoice {
@@ -45,6 +46,18 @@ impl ColorChoice {
                     false
                 }
             }
+        }
+    }
+}
+
+impl FromStr for ColorChoice {
+    type Err=();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "auto" => Ok(ColorChoice::Auto),
+            "never" => Ok(ColorChoice::Never),
+            "always" => Ok(ColorChoice::Always),
+            _ => Err(()),
         }
     }
 }
