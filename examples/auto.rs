@@ -17,8 +17,9 @@
 use log::{error, warn, info, debug, trace};
 use colored_logger::FormatterBuilder;
 use clap::{Arg, App};
+use failure::Error;
 
-fn main() {
+fn main() -> Result<(), Error> {
     let matches = App::new("Colored Logger example")
         .arg(
             Arg::with_name("color")
@@ -32,7 +33,7 @@ fn main() {
                     anywhere else")
         )
         .get_matches();
-    let color_choice = matches.value_of("color").unwrap().parse().unwrap();
+    let color_choice = matches.value_of("color").unwrap().parse()?;
 
 
     let formatter = FormatterBuilder::new()
@@ -41,12 +42,13 @@ fn main() {
 
     flexi_logger::Logger::with_str("auto=trace")
         .format(formatter)
-        .start()
-        .unwrap_or_else(|e| panic!("Logger initialization failed with {}", e));
+        .start()?;
 
     error!("This is an error example");
     warn!("This is a warning example");
     info!("This is an info example example");
     debug!("This is a debug example");
     trace!("This is a trace example");
+
+    Ok(())
 }
