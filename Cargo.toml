@@ -4,7 +4,7 @@ authors = [
     "Jacek Chmiel <jchmiel@collective-sense.com>"
 ]
 name = "colored_logger"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2018"
 
 [dependencies]
@@ -13,3 +13,5 @@ colored = "1.6.1"
 flexi_logger = "0.10.3"
 log = "0.4.6"
 atty = "0.2.11"
+clap = "2.32.0"
+failure = "0.1.5"
