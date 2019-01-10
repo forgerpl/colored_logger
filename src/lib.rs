@@ -13,6 +13,9 @@ use flexi_logger::{Level, Record};
 use std::env;
 use std::str::FromStr;
 
+#[cfg(feature = "thread_name")]
+use std::thread;
+
 #[macro_use]
 extern crate failure;
 
@@ -54,7 +57,7 @@ impl ColorChoice {
 pub struct InvalidColorChoice;
 
 impl FromStr for ColorChoice {
-    type Err=InvalidColorChoice;
+    type Err = InvalidColorChoice;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "auto" => Ok(ColorChoice::Auto),
@@ -114,12 +117,45 @@ pub fn formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io:
     color_formatter(w, record)
 }
 
+#[cfg(feature = "thread_name")]
 fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
         w,
-        "[{}] {} [{}:{}] {}",
+        "[{}] {:5} [{}] [{}:{}] {}",
+        color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
+        color(&level, level),
+        color(&thread::current().name().unwrap_or("<unnamed>"), level),
+        color(&record.file().unwrap_or_default(), level),
+        color(&record.line().unwrap_or_default(), level),
+        &record.args()
+    )
+}
+
+#[cfg(feature = "thread_name")]
+fn no_color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+    let level = record.level();
+
+    write!(
+        w,
+        "[{}] {:5} [{}] [{}:{}] {}",
+        &Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"),
+        &thread::current().name().unwrap_or("<unnamed>"),
+        &level,
+        &record.file().unwrap_or_default(),
+        &record.line().unwrap_or_default(),
+        &record.args()
+    )
+}
+
+#[cfg(not(feature = "thread_name"))]
+fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+    let level = record.level();
+
+    write!(
+        w,
+        "[{}] {:5} [{}:{}] {}",
         color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
         color(&level, level),
         color(&record.file().unwrap_or_default(), level),
@@ -128,12 +164,13 @@ fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::i
     )
 }
 
+#[cfg(not(feature = "thread_name"))]
 fn no_color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
         w,
-        "[{}] {} [{}:{}] {}",
+        "[{}] {:5} [{}:{}] {}",
         &Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"),
         &level,
         &record.file().unwrap_or_default(),

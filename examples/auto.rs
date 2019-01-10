@@ -13,11 +13,10 @@
 /// using colors.
 ///
 /// Use `--color` option for experimenting with forcing/blocking colored output.
-
-use log::{error, warn, info, debug, trace};
+use clap::{App, Arg};
 use colored_logger::FormatterBuilder;
-use clap::{Arg, App};
 use failure::Error;
+use log::{debug, error, info, trace, warn};
 
 fn main() -> Result<(), Error> {
     let matches = App::new("Colored Logger example")
@@ -28,17 +27,16 @@ fn main() -> Result<(), Error> {
                 .takes_value(true)
                 .possible_values(&["auto", "always", "never"])
                 .default_value("auto")
-                .help("Decides wheteher to use colors in log messages or not. \
-                    `auto` should result with colors in terminal and no colors \
-                    anywhere else")
+                .help(
+                    "Decides wheteher to use colors in log messages or not. \
+                     `auto` should result with colors in terminal and no colors \
+                     anywhere else",
+                ),
         )
         .get_matches();
     let color_choice = matches.value_of("color").unwrap().parse()?;
 
-
-    let formatter = FormatterBuilder::new()
-        .with_color(color_choice)
-        .build();
+    let formatter = FormatterBuilder::new().with_color(color_choice).build();
 
     flexi_logger::Logger::with_str("auto=trace")
         .format(formatter)
