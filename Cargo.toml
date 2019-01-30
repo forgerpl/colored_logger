@@ -4,8 +4,14 @@ authors = [
     "Jacek Chmiel <jchmiel@collective-sense.com>"
 ]
 name = "colored_logger"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2018"
+
+[features]
+default = []
+
+# Add current thread name to log messages
+thread_name = []
 
 [dependencies]
 chrono = "0.4.6"
