@@ -7,9 +7,8 @@
 //! See examples/auto.rs
 
 use atty;
-use chrono::Local;
 use colored::{ColoredString, Colorize};
-use flexi_logger::{Level, Record};
+use flexi_logger::{DeferredNow, Level, Record};
 use std::env;
 use std::str::FromStr;
 
@@ -84,7 +83,9 @@ impl FormatterBuilder {
         self
     }
 
-    pub fn build(self) -> fn(&mut dyn std::io::Write, &Record) -> Result<(), std::io::Error> {
+    pub fn build(
+        self,
+    ) -> fn(&mut dyn std::io::Write, &mut DeferredNow, &Record) -> Result<(), std::io::Error> {
         if self.color.should_attempt_color() {
             color_formatter
         } else {
@@ -113,18 +114,26 @@ fn color<T: ToString>(fstr: &T, level: Level) -> ColoredString {
 }
 
 #[deprecated(since = "0.4.0", note = "use FormatterBuilder instead")]
-pub fn formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), std::io::Error> {
-    color_formatter(w, record)
+pub fn formatter(
+    w: &mut dyn std::io::Write,
+    now: &mut DeferredNow,
+    record: &Record,
+) -> Result<(), std::io::Error> {
+    color_formatter(w, now, record)
 }
 
 #[cfg(feature = "thread_name")]
-fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+fn color_formatter(
+    w: &mut std::io::Write,
+    now: &mut DeferredNow,
+    record: &Record,
+) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
         w,
         "[{}] {:5} [{}] [{}:{}] {}",
-        color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
+        color(&now.now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
         color(&level, level),
         color(&thread::current().name().unwrap_or("<unnamed>"), level),
         color(&record.file().unwrap_or_default(), level),
@@ -134,13 +143,17 @@ fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::i
 }
 
 #[cfg(feature = "thread_name")]
-fn no_color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+fn no_color_formatter(
+    w: &mut std::io::Write,
+    now: &mut DeferredNow,
+    record: &Record,
+) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
         w,
         "[{}] {:5} [{}] [{}:{}] {}",
-        &Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"),
+        &now.now().format("%Y-%m-%d %H:%M:%S%.6f %:z"),
         &thread::current().name().unwrap_or("<unnamed>"),
         &level,
         &record.file().unwrap_or_default(),
@@ -150,13 +163,17 @@ fn no_color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std
 }
 
 #[cfg(not(feature = "thread_name"))]
-fn color_formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+fn color_formatter(
+    w: &mut dyn std::io::Write,
+    now: &mut DeferredNow,
+    record: &Record,
+) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
         w,
         "[{}] {:5} [{}:{}] {}",
-        color(&Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
+        color(&now.now().format("%Y-%m-%d %H:%M:%S%.6f %:z"), level),
         color(&level, level),
         color(&record.file().unwrap_or_default(), level),
         color(&record.line().unwrap_or_default(), level),
@@ -165,13 +182,17 @@ fn color_formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), st
 }
 
 #[cfg(not(feature = "thread_name"))]
-fn no_color_formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+fn no_color_formatter(
+    w: &mut dyn std::io::Write,
+    now: &mut DeferredNow,
+    record: &Record,
+) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
         w,
         "[{}] {:5} [{}:{}] {}",
-        &Local::now().format("%Y-%m-%d %H:%M:%S%.6f %:z"),
+        &now.now().format("%Y-%m-%d %H:%M:%S%.6f %:z"),
         &level,
         &record.file().unwrap_or_default(),
         &record.line().unwrap_or_default(),
