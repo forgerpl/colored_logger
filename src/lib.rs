@@ -84,7 +84,7 @@ impl FormatterBuilder {
         self
     }
 
-    pub fn build(self) -> fn(&mut std::io::Write, &Record) -> Result<(), std::io::Error> {
+    pub fn build(self) -> fn(&mut dyn std::io::Write, &Record) -> Result<(), std::io::Error> {
         if self.color.should_attempt_color() {
             color_formatter
         } else {
@@ -113,7 +113,7 @@ fn color<T: ToString>(fstr: &T, level: Level) -> ColoredString {
 }
 
 #[deprecated(since = "0.4.0", note = "use FormatterBuilder instead")]
-pub fn formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+pub fn formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), std::io::Error> {
     color_formatter(w, record)
 }
 
@@ -150,7 +150,7 @@ fn no_color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std
 }
 
 #[cfg(not(feature = "thread_name"))]
-fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+fn color_formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
@@ -165,7 +165,7 @@ fn color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::i
 }
 
 #[cfg(not(feature = "thread_name"))]
-fn no_color_formatter(w: &mut std::io::Write, record: &Record) -> Result<(), std::io::Error> {
+fn no_color_formatter(w: &mut dyn std::io::Write, record: &Record) -> Result<(), std::io::Error> {
     let level = record.level();
 
     write!(
