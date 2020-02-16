@@ -14,10 +14,10 @@ default = []
 thread_name = []
 
 [dependencies]
-chrono = "0.4.6"
-colored = "1.6.1"
-flexi_logger = "0.10.3"
-log = "0.4.6"
-atty = "0.2.11"
-clap = "2.32.0"
-failure = "0.1.5"
+chrono = "0.4.10"
+colored = "1.9.2"
+flexi_logger = "0.14.8"
+log = "0.4.8"
+atty = "0.2.14"
+clap = "2.33.0"
+failure = "0.1.6"
